@@ -8,22 +8,23 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input string:");
         String userInput = scanner.nextLine();
-        String result = separateCharactersBySpace(userInput);
-        System.out.println(result);
+        String[] binaryFormStrings = convertToBinaryFormString(userInput);
+        System.out.println("The result:");
+        for (int i = 0; i < userInput.length();i++){
+            System.out.printf(
+                    "%c = %s%n",userInput.charAt(i),binaryFormStrings[i]
+            );
+        }
     }
 
-    private static String separateCharactersBySpace(String userInput) {
-        if (userInput.length() <= 1) {
-            return userInput;
+    private static String[] convertToBinaryFormString(String userInput) {
+        String[] result = new String[userInput.length()];
+        for (int i = 0;i< userInput.length(); i++){
+            char chr = userInput.charAt(i);
+            String binaryFormat = String.format("%7s",Integer.toBinaryString(chr)).replace(' ','0');
+            result[i]=binaryFormat;
         }
-        char[] stringChars = userInput.toCharArray();
-        char[] temp = new char[stringChars.length*2-1];
-        for (int i = 0; i < stringChars.length; i++){
-            temp[2*i] = stringChars[i];
-        }
-        for (int i = 0; i < stringChars.length-1; i++){
-            temp[2*i+1] = ' ';
-        }
-        return new String(temp);
+        return result;
     }
+
 }
