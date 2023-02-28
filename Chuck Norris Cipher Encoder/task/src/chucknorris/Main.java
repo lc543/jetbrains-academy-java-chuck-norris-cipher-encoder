@@ -1,22 +1,73 @@
 package chucknorris;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
+    private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        boolean isRunning = true;
+        while (isRunning) {
+            System.out.println("Please input operation (encode/decode/exit):");
+            String operation = scanner.nextLine();
+            switch (operation) {
+                case "encode":
+                    doEncoding();
+                    break;
+                case "decode":
+                    doDecoding();
+                    break;
+                case "exit":
+                    System.out.println("Bye");
+                    isRunning = false;
+                    break;
+                default:
+                    System.out.printf("There is no '%s' operation\n", operation);
+                    break;
+            }
+        }
+    }
+
+
+    private static void doDecoding() {
         System.out.println("Input encoded string:");
-        String userInput = scanner.nextLine();
-        String encodedText = decryptChuckNorris(userInput);
-        System.out.println("The result:\n" + encodedText);
+        String text = scanner.nextLine();
+        if (!isEncodedStringValid(text)) {
+            System.out.println("Encoded string is not valid.");
+            return;
+        }
+        String encoded = decryptChuckNorris(text);
+        System.out.println("Decoded string::\n" + encoded);
+    }
+
+    private static boolean isEncodedStringValid(String encodedString) {
+        String[] sequences = encodedString.split(" ");
+        if (sequences.length % 2 == 1) {
+            return false; // The number of blocks is odd;
+        }
+        int bitCount = 0;
+        for (int i = 0; i < sequences.length / 2; i++) {
+            if (!(sequences[2 * i].equals("00") || sequences[2 * i].equals("0"))) {
+                return false; // The first block of each sequence is not 0 or 00;
+            }
+            String bitStreakBlock = sequences[2 * i + 1];
+            for (int j = 0; j < bitStreakBlock.length(); j++) {
+                if (bitStreakBlock.charAt(j) != '0') {
+                    return false; //The encoded message includes characters other than 0 or spaces;
+                }
+            }
+            bitCount += bitStreakBlock.length();
+        }
+        if (bitCount % 7 != 0) {
+            return false; // The length of the decoded binary string is not a multiple of 7.
+        }
+        return true;
     }
 
     private static String decryptChuckNorris(String encryptedText) {
         String binaryString = decodeChuckNorris(encryptedText);
-        return convertBinaryStringToString(binaryString);;
+        return convertBinaryStringToString(binaryString);
     }
 
 
@@ -41,11 +92,27 @@ public class Main {
         return sb.toString();
     }
 
+    private static void doEncoding() {
+        System.out.println("Input string:");
+        String text = scanner.nextLine();
+        String encoded = encryptChuckNorris(text);
+        System.out.println("Input encoded string:\n" + encoded);
+    }
 
     private static String encryptChuckNorris(String text) {
         String binaryString = String.join("", convertToBinaryString(text));
         List<String> encodedBitStreaks = encodeChuckNorris(binaryString);
         return String.join(" ", encodedBitStreaks);
+    }
+
+    private static String[] convertToBinaryString(String text) {
+        String[] result = new String[text.length()];
+        for (int i = 0; i < text.length(); i++) {
+            char chr = text.charAt(i);
+            String binaryFormat = String.format("%7s", Integer.toBinaryString(chr)).replace(' ', '0');
+            result[i] = binaryFormat;
+        }
+        return result;
     }
 
     private static List<String> encodeChuckNorris(String binaryString) {
@@ -70,16 +137,5 @@ public class Main {
         String firstBlock = bit == '0' ? "00" : "0";
         String secondBlock = "0".repeat(streakSize);
         return firstBlock + " " + secondBlock;
-    }
-
-
-    private static String[] convertToBinaryString(String text) {
-        String[] result = new String[text.length()];
-        for (int i = 0; i < text.length(); i++) {
-            char chr = text.charAt(i);
-            String binaryFormat = String.format("%7s", Integer.toBinaryString(chr)).replace(' ', '0');
-            result[i] = binaryFormat;
-        }
-        return result;
     }
 }
